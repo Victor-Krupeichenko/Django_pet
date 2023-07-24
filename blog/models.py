@@ -23,7 +23,7 @@ class Post(models.Model):
 
 class Category(models.Model):
     """Модель категории для поста"""
-    title = models.CharField(max_length=100, db_index=True, verbose_name="Название")
+    title = models.CharField(max_length=100, db_index=True, verbose_name="Название", unique=True)
 
     def __str__(self):
         return self.title
