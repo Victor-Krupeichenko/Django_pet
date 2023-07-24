@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from .models import Category
 
 
 class CreateUserForm(UserCreationForm):
@@ -47,3 +48,17 @@ class LoginUserForm(AuthenticationForm):
             self.fields[filed].widget.attrs["class"] = "form-control"
             self.fields[filed].widget.attrs["placeholder"] = self.fields[filed].label
             self.fields[filed].label = ""
+
+
+class CategoryForm(forms.ModelForm):
+    """Category Form"""
+
+    class Meta:
+        model = Category
+        fields = ["title"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title"].widget.attrs["class"] = "form-control"
+        self.fields["title"].widget.attrs["placeholder"] = "Name of category"
+        self.fields["title"].label = ""
