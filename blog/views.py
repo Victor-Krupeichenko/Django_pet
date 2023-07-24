@@ -1,13 +1,16 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-from .forms import CreateUserForm, LoginUserForm
-from django.views.generic import CreateView
+from .forms import CreateUserForm, LoginUserForm, CategoryForm
+from django.views.generic import CreateView, ListView
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
 from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Category
+from .utils import CategoryMixin
+from django.db.models import Count
 
 
 def index(request):
@@ -72,7 +75,7 @@ class UpdateUser(LoginRequiredMixin, UpdateView):
     template_name = "blog/create_user.html"
     success_url = reverse_lazy("home")
 
-    def form_invalid(self, form):
+    def form_valid(self, form):
         try:
             user = form.save()
             messages.success(self.request, message=f"{self.object.username} Success update")
@@ -90,7 +93,7 @@ class UpdateUser(LoginRequiredMixin, UpdateView):
 class DeleteUser(LoginRequiredMixin, DeleteView):
     """Delete user"""
     model = User
-    template_name = "blog/delete_user.html"
+    template_name = "blog/delete.html"
     success_url = reverse_lazy("register_user")
 
     def delete(self, request, *args, **kwargs):
@@ -104,4 +107,74 @@ class DeleteUser(LoginRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["delete_user"] = True
+        return context
+
+
+class CreateCategory(CategoryMixin, CreateView):
+    """Create category"""
+    form_class = CategoryForm
+    template_name = "blog/create_category.html"
+    name_view = "CreateCategory"
+    dispath_redirect_url = "login_user"
+    redirect_success = "list_category"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["create_category"] = True
+        return context
+
+
+class ListCategory(LoginRequiredMixin, ListView):
+    """View all Category"""
+    model = Category
+    template_name = "blog/list_category.html"
+
+    def get_queryset(self):
+        return Category.objects.annotate(cnt=Count("post"))
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            messages.error(request, message=f"{request.user.username} Not enough rights")
+            logout(request)
+            return redirect("login_user")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["list_category"] = True
+        return context
+
+
+class UpdateCategory(CategoryMixin, UpdateView):
+    """Update Category"""
+    model = Category
+    form_class = CategoryForm
+    template_name = "blog/create_category.html"
+    name_view = "UpdateCategory"
+    dispath_redirect_url = "login_user"
+    redirect_success = "list_category"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["update_category"] = True
+        return context
+
+
+class DeleteCategory(LoginRequiredMixin, DeleteView):
+    """Delete category"""
+    model = Category
+    success_url = reverse_lazy("list_category")
+    template_name = "blog/delete.html"
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            category = self.get_object()
+            messages.success(request, message=f"{category.title} Successfully deleted")
+        except Exception as ex:
+            messages.error(request, message=f"{ex} Error deleting user")
+        return super().delete(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["delete_category"] = True
         return context
