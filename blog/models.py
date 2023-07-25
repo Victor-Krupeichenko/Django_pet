@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse_lazy
+from django.contrib.postgres.indexes import GinIndex
 
 
 class Post(models.Model):
@@ -20,6 +21,7 @@ class Post(models.Model):
         ordering = ["-created_at", "title"]
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
+        indexes = [GinIndex(name='SearchGinIndex', fields=['title', 'content'], fastupdate=False)]
 
     def get_absolute_url(self):
         context = {
