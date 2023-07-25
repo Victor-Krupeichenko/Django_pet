@@ -1,20 +1,16 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
-from .forms import CreateUserForm, LoginUserForm, CategoryForm
-from django.views.generic import CreateView, ListView
+from django.shortcuts import redirect
+from .forms import CreateUserForm, LoginUserForm, CategoryForm, PostCreateForm
+from django.views.generic import CreateView, ListView, DetailView
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
 from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Category
+from .models import Category, Post
 from .utils import CategoryMixin
 from django.db.models import Count
-
-
-def index(request):
-    return render(request, "blog/index.html")
 
 
 class RegisterUser(CreateView):
@@ -82,7 +78,7 @@ class UpdateUser(LoginRequiredMixin, UpdateView):
             login(self.request, user)
         except Exception as ex:
             messages.error(self.request, message=f"{ex} Error user updte")
-        return super().form_invalid(form)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -177,4 +173,87 @@ class DeleteCategory(LoginRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["delete_category"] = True
+        return context
+
+
+class CreatePost(LoginRequiredMixin, CreateView):
+    """Create Post"""
+    form_class = PostCreateForm
+    template_name = "blog/create_post.html"
+
+    def form_valid(self, form):
+        try:
+            post = form.save(commit=False)
+            post.author_id = self.request.user.pk
+            post.save()
+            messages.success(self.request, message=f"{post.title} Successfully created")
+            return redirect(post)
+        except Exception as ex:
+            messages.error(self.request, message=f"{ex} Error created post")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["create_post"] = True
+        return context
+
+
+class ListPostView(ListView):
+    """View All Posts"""
+    model = Post
+    template_name = "blog/index.html"
+
+    def get_queryset(self):
+        return Post.objects.filter(is_publish=True).select_related("category")
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "All Post"
+        return context
+
+
+class DetailPostView(DetailView):
+    """Detail Post"""
+    model = Post
+    template_name = "blog/detail_post.html"
+
+
+class UpdatePost(LoginRequiredMixin, UpdateView):
+    """Update Post"""
+    model = Post
+    form_class = PostCreateForm
+    template_name = "blog/create_post.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["update_post"] = True
+        return context
+
+    def form_valid(self, form):
+        try:
+            post = form.save()
+            messages.success(self.request, message=f"{post.title} Successfully updated")
+            return redirect(post)
+        except Exception as ex:
+            messages.error(self.request, message=f"{ex} Error updated")
+        return super().form_valid(form)
+
+
+class DeletePost(LoginRequiredMixin, DeleteView):
+    """Delete Post"""
+    model = Post
+    template_name = "blog/delete.html"
+    success_url = reverse_lazy("home")
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            post = self.get_object()
+            messages.success(request, message=f"{post.title} Successfully deleted")
+        except Exception as ex:
+            messages.error(request, message=f"{ex} Error deleted")
+        return super().delete(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["delete_post"] = True
         return context
