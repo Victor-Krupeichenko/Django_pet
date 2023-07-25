@@ -202,6 +202,7 @@ class ListPostView(ListView):
     """View All Posts"""
     model = Post
     template_name = "blog/index.html"
+    paginate_by = 1
 
     def get_queryset(self):
         return Post.objects.filter(is_publish=True).select_related("category")
@@ -256,4 +257,20 @@ class DeletePost(LoginRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["delete_post"] = True
+        return context
+
+
+class PostByCategory(ListView):
+    """Posts for category"""
+    model = Post
+    template_name = "blog/index.html"
+    paginate_by = 1
+
+    def get_queryset(self):
+        return Post.objects.filter(category_id=self.kwargs["pk"], is_publish=True).select_related("category")
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["category"] = True
+        context["title"] = Category.objects.get(pk=self.kwargs["pk"])
         return context
