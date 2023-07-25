@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
+from django.core.paginator import Paginator
+from django.shortcuts import redirect, render
 from .forms import CreateUserForm, LoginUserForm, CategoryForm, PostCreateForm
 from django.views.generic import CreateView, ListView, DetailView
 from django.contrib import messages
@@ -11,6 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Category, Post
 from .utils import CategoryMixin
 from django.db.models import Count
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
 
 class RegisterUser(CreateView):
@@ -274,3 +276,24 @@ class PostByCategory(ListView):
         context["category"] = True
         context["title"] = Category.objects.get(pk=self.kwargs["pk"])
         return context
+
+
+def search_post(request):
+    search = request.GET.get("search", "")
+    object_list = list()
+    if search:
+        vector = SearchVector("title", weight="A") + SearchVector("content", weight="B")
+        query = SearchQuery(search)
+        object_list = Post.objects.annotate(rank=SearchRank(vector, query, cover_density=True)).filter(
+            rank__gte=0.3, is_publish=True).order_by("-rank")
+    total_posts = len(object_list)
+    paginator = Paginator(object_list, 1)
+    page_num = request.GET.get("page", 1)
+    object_list = paginator.get_page(page_num)
+    context = {
+        "search": search,
+        "object_list": object_list,
+        "page_obj": object_list,
+        "total_posts": total_posts,
+    }
+    return render(request, "blog/index.html", context)
