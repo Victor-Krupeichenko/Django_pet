@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse_lazy
 
 
 class Post(models.Model):
@@ -19,6 +20,12 @@ class Post(models.Model):
         ordering = ["-created_at", "title"]
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
+
+    def get_absolute_url(self):
+        context = {
+            "pk": self.pk
+        }
+        return reverse_lazy("detail_post_view", kwargs=context)
 
 
 class Category(models.Model):
