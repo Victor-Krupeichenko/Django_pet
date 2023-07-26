@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    Delete User
+{% endblock %}
+
+{% block content %}
+    {% if delete_category %}
+        <h1>Delete category</h1>
+        <h6>{{ category.title }}</h6>
+    {% else %}
+        <h1>Delete User</h1>
+        <h6>{{ request.user.username }}</h6>
+    {% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {% if delete_category %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Delete {{ category.title }}</button>
+                <br>
+                <strong class="text-center">Cancel deletion</strong>
+                <button type="submit" class="btn btn-primary btn-block btn-sm mt-2">
+                    <a style="color: aliceblue; text-decoration: none;" href="{% url 'list_category' %}">Cancel</a>
+                </button>
+            </div>
+        {% elif delete_post %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Delete {{ post.title }}</button>
+                <br>
+                <strong class="text-center">Cancel deletion</strong>
+                <a href="{% url 'home' %}" style="text-decoration: none; color: aliceblue">
+                    <div class="d-grid gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary btn-block btn-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </a>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">
+                    Delete {{ request.user.username }}</button>
+                <br>
+                <strong class="text-center">Cancel deletion</strong>
+                <button type="submit" class="btn btn-primary btn-block btn-sm mt-2">
+                    <a style="color: aliceblue; text-decoration: none;" href="{% url 'home' %}">Cancel</a>
+                </button>
+            </div>
+        {% endif %}
+    </form>
+{% endblock %}

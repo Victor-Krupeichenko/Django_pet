@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load blog_tags %}
+{% block title %}
+    {% if category %}
+        {{ title }}
+    {% else %}
+        {{ title }}
+    {% endif %}
+{% endblock %}
+
+{% block category %}
+    {% get_categories %}
+{% endblock %}
+
+
+{% block content %}
+    {% if search and total_posts > 0 %}
+        <h6>Found: {{ total_posts }}</h6>
+    {% else %}
+        <h1>{{ title }}</h1>
+    {% endif %}
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        {% for post in object_list %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">{{ post.content|truncatewords:10 }}</p>
+                        <a href="{{ post.get_absolute_url }}"
+                           class="btn btn-primary stretched-link">Read</a>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-body-secondary">{{ post.created_at|date:"d-m-Y H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+                <h4 class="text-center">Not found{% if search %}: {{ search }}{% endif %}</h4>
+        {% endfor %}
+    </div>
+{% endblock %}

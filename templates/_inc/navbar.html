@@ -1,0 +1,57 @@
+<nav class="navbar bg-dark navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}">Navbar
+            {#            <img src="" width="100" alt="">#}
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link active">Welcome, {{ request.user.username }}</a>
+                    </li>
+                    {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link active"
+                               href="{% url 'admin:index' %}">Admin</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if list_category %}active{% endif %}"
+                               href="{% url 'list_category' %}">List Category</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if update_user %}active{% endif %}"
+                           href="{% url 'update_user' request.user.pk %}">UpdateUser</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if delete_user %}active{% endif %}"
+                           href="{% url 'delete_user' request.user.pk %}">DeleteUser</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout_user' %}">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if create_post %}active{% endif %}" href="{% url 'create_post' %}">Create
+                            Post</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if register_user %}active{% endif %}" href="{% url 'register_user' %}">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if login_user %}active{% endif %}" href="{% url 'login_user' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form action="{% url 'search_post' %}" method="get" class="d-flex">
+                <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search"
+                       value="{{ search }}">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>

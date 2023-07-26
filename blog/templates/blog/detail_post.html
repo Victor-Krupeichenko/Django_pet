@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load blog_tags %}
+{% block title %}
+    {{ object.title }}
+{% endblock %}
+
+{% block category %}
+    {% get_categories %}
+{% endblock %}
+
+{% block content %}
+    <div class="card mb-3">
+        <div class="card-header">
+            Категория: <a href="{{ object.category.get_absolute_url }}">{{ object.category.title }}</a>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ object.title }}</h5>
+            <p class="card-text">{{ object.content|safe }}</p>
+        </div>
+        <div class="card-footer text-muted">
+            {{ object.created_at|date:"Y-m-d H:i:s" }}
+        </div>
+    </div>
+    <br>
+    <a href="{% url 'update_post' object.pk %}" style="text-decoration: none; color: #F0F8FF">
+        <div class="d-grid gap-2 mt-2">
+            <button type="submit" class="btn btn-primary btn-block btn-sm">
+                Update Post
+            </button>
+        </div>
+    </a>
+    <br>
+    <a href="{% url 'delete_post' object.pk %}" style="text-decoration: none; color: #F0F8FF">
+        <div class="d-grid gap-2 mt-2">
+            <button type="submit" class="btn btn-primary btn-block btn-sm">
+                Delte Post
+            </button>
+        </div>
+    </a>
+    <br>
+    <a href="{% url 'home' %}" style="text-decoration: none; color: #F0F8FF">
+        <div class="d-grid gap-2 mt-2">
+            <button type="submit" class="btn btn-primary btn-block btn-sm">
+                Home
+            </button>
+        </div>
+    </a>
+{% endblock %}
+

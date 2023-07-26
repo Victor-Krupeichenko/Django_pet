@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load blog_tags %}
+{% block title %}
+    {% if update_category %}
+        Upedate category: {{ category.title }}
+    {% else %}
+        Create category
+    {% endif %}
+{% endblock %}
+
+
+{% block category %}
+    {% get_categories %}
+{% endblock %}
+
+
+{% block content %}
+    {% if update_category %}
+        <h2>Update Category: {{ category.title }}</h2>
+    {% else %}
+        <h2>Create category</h2>
+    {% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if update_category %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Update Category</button>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Create Category</button>
+            </div>
+        {% endif %}
+    </form>
+{% endblock %}

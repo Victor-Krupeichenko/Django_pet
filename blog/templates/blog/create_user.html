@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {% if login_user %}
+        Login User
+    {% elif update_user %}
+        Update User
+    {% else %}
+        Register User
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+    <img src="{% static 'blog/images/register.png' %}" width="150" alt="">
+    </div>
+    {% if login_user %}
+        <h1>Login User</h1>
+    {% elif update_user %}
+        <h1>Update User</h1>
+    {% else %}
+        <h1>Register User</h1>
+    {% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if login_user %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Login</button>
+            </div>
+        {% elif update_user %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Update</button>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-block btn-sm">Register</button>
+            </div>
+        {% endif %}
+    </form>
+{% endblock %}
